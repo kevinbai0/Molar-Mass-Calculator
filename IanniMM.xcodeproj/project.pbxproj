@@ -146,6 +146,13 @@
 		486398CA218684AC00C0B1F5 /* InputViewButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputViewButton.swift; sourceTree = "<group>"; };
 		486398CB218684AC00C0B1F5 /* FormulaInputView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormulaInputView.swift; sourceTree = "<group>"; };
 		486398CC218684AC00C0B1F5 /* SolutionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SolutionViewCell.swift; sourceTree = "<group>"; };
+		48669C6421D3469C0017793D /* SourceCodePro-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceCodePro-Medium.ttf"; sourceTree = "<group>"; };
+		48669C6521D3469D0017793D /* SourceCodePro-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceCodePro-Light.ttf"; sourceTree = "<group>"; };
+		48669C6621D3469D0017793D /* SourceCodePro-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceCodePro-Regular.ttf"; sourceTree = "<group>"; };
+		48669C6721D3469D0017793D /* SourceCodePro-ExtraLight.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceCodePro-ExtraLight.ttf"; sourceTree = "<group>"; };
+		48669C6821D3469D0017793D /* SourceCodePro-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceCodePro-Black.ttf"; sourceTree = "<group>"; };
+		48669C6921D3469D0017793D /* SourceCodePro-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceCodePro-Semibold.ttf"; sourceTree = "<group>"; };
+		48669C6A21D3469D0017793D /* SourceCodePro-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SourceCodePro-Bold.ttf"; sourceTree = "<group>"; };
 		487CDC492079BB9E00568996 /* PeriodicTable.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = PeriodicTable.json; sourceTree = "<group>"; };
 		48A7419C212C8DCE00416491 /* QwertyKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QwertyKeysView.swift; sourceTree = "<group>"; };
 		48A7419E212CBE8800416491 /* NumpadKeysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumpadKeysView.swift; sourceTree = "<group>"; };
@@ -332,9 +339,24 @@
 			path = CustomViews;
 			sourceTree = "<group>";
 		};
+		48669C6B21D346A40017793D /* SourceCodePro */ = {
+			isa = PBXGroup;
+			children = (
+				48669C6821D3469D0017793D /* SourceCodePro-Black.ttf */,
+				48669C6A21D3469D0017793D /* SourceCodePro-Bold.ttf */,
+				48669C6721D3469D0017793D /* SourceCodePro-ExtraLight.ttf */,
+				48669C6521D3469D0017793D /* SourceCodePro-Light.ttf */,
+				48669C6421D3469C0017793D /* SourceCodePro-Medium.ttf */,
+				48669C6621D3469D0017793D /* SourceCodePro-Regular.ttf */,
+				48669C6921D3469D0017793D /* SourceCodePro-Semibold.ttf */,
+			);
+			path = SourceCodePro;
+			sourceTree = "<group>";
+		};
 		487CDC50207C0E1500568996 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
+				48669C6B21D346A40017793D /* SourceCodePro */,
 				48599223212922FE00BED5AB /* Nunito */,
 				487CDC51207C0E2200568996 /* Dosis */,
 			);
