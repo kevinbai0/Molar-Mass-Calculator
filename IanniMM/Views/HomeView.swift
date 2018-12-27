@@ -14,13 +14,10 @@ protocol HomeViewDelegate:class {
 }
 
 class HomeView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate  {
-    let titleLabel = UILabel.create("Molar Mass Calculator", .white, .mainFont(.bold, 32.scaled))
-    let subTitleLabel = UILabel.create("For Frank Ianni", .white, .mainFont(.light, 14.scaled))
+    let titleLabel = UILabel.create("Molar Mass Calculator", .rgb(51,51,51), .mainFont(.black, 42.scaled))
     let subTitleButton = UIButton()
     let formulaInputView = FormulaInputView()
-    
-    let helpButton = UIButton()
-    
+        
     var state: ApplicationState = .defaultState {
         didSet {
             if oldValue != .selectedTextField && state == .selectedTextField {
@@ -31,38 +28,31 @@ class HomeView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate  {
     // hide the search menu when the user taps the input field or exits the search menu
     var searchMenuHidden: Bool = true
     weak var delegate: HomeViewDelegate?
-    let gradientLayer = CAGradientLayer()
     
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     init() {
         // set the background colors
         super.init(frame: CGRect.zero)
-        self.backgroundColor = .rgb(91,160,94)
-        gradientLayer.colors = [UIColor.rgb(91,160,94).cgColor, UIColor.rgb(115,206,160).cgColor]
-        self.layer.addSublayer(gradientLayer)
         formulaInputView.inputTextField.delegate = self
         
-        helpButton.setTitle("?", for: [])
-        helpButton.setTitleColor(.white, for: [])
-        helpButton.titleLabel?.font = .mainFont(.extraLight, 32.scaled)
-        helpButton.layer.borderWidth = 1.0
-        helpButton.layer.borderColor = UIColor.white.cgColor
-        
-        subTitleButton.layer.borderWidth = 1.0
-        subTitleButton.layer.borderColor = UIColor.white.cgColor
-        subTitleButton.layer.cornerRadius = 5.0
         
         subTitleButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5.scaled, bottom: 0, right: 5.scaled)
         subTitleButton.setTitle("For Frank Ianni", for: [])
-        subTitleButton.titleLabel?.font = .mainFont(.light, 14.scaled)
+        subTitleButton.setTitleColor(.rgb(51,51,51), for: [])
+        subTitleButton.layer.shadowColor = UIColor.black.cgColor
+        subTitleButton.layer.shadowOffset = CGSize(width: 0, height: 3)
+        subTitleButton.layer.shadowRadius = 10
+        subTitleButton.layer.shadowOpacity = 0.16
+        subTitleButton.titleLabel?.font = .mainFont(.regular, 12.scaled)
+        subTitleButton.backgroundColor = .white
+        subTitleButton.contentEdgeInsets = UIEdgeInsets(top: 15.scaled, left: 10.scaled, bottom: 15.scaled, right: 10.scaled)
 
         // init constraints
-        titleLabel.textAlignment = .center
+        titleLabel.textAlignment = .left
+        titleLabel.numberOfLines = 2
         titleLabel.addToView(self, .left(20.scaled.pad), .right(20.scaled.pad), .top(38.scaled.pad))
-        subTitleButton.addToView(self, .right(titleLabel.right), .top(titleLabel.bottom), .width(0.4.ratio))
-        titleLabel.adjustsFontSizeToFitWidth = true
-        helpButton.addToView(self, .bottom(20.scaled.pad), .left(20.scaled.pad), .width(50.scaled.constant), .height(helpButton.width))
-        formulaInputView.addToView(self, .centerX, .left(20.scaled.pad), .right(20.scaled.pad), .centerY, .height(50.scaled.constant))
+        subTitleButton.addToView(self, .left(titleLabel.left), .top(titleLabel.bottom, 20.scaled.pad), .width(0.5.ratio))
+        formulaInputView.addToView(self, .centerX, .left(20.scaled.pad), .right(20.scaled.pad), .bottom(20.scaled.pad), .height(50.scaled.constant))
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -71,8 +61,10 @@ class HomeView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate  {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        helpButton.layer.cornerRadius = helpButton.frame.width / 2
-        gradientLayer.frame = self.bounds
+        subTitleButton.layer.cornerRadius = subTitleButton.frame.height / 2
+        let bezierPath =  UIBezierPath(roundedRect: subTitleButton.bounds, byRoundingCorners: UIRectCorner.allCorners, cornerRadii: CGSize(width: subTitleButton.frame.height / 2, height: subTitleButton.frame.height / 2))
+        subTitleButton.layer.shadowPath = bezierPath.cgPath
+
     }
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         delegate?.homeViewDidSelectInputField()

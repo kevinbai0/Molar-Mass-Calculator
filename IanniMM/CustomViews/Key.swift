@@ -38,20 +38,20 @@ class Key: UIView {
         didSet {
             if oldValue != .defaultState && selectableState == .defaultState {
                 UIView.animate(withDuration: 0.1, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
-                    self.backgroundColor = .rgb(255,255,255, 0.61)
+                    self.backgroundColor = .white
                     self.transform = .identity
                     self.label.alpha = 1.0
                 }, completion: nil)
             }
             else if oldValue != .highlightedState && selectableState == .highlightedState {
                 UIView.animate(withDuration: 0.1, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
-                    self.backgroundColor = .rgb(255,255,255,0.3)
+                    self.backgroundColor = .rgb(178,178,178)
                     self.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
                 }, completion: nil)
             }
             else if oldValue != .permanentUnselectable && selectableState == .permanentUnselectable {
                 self.label.alpha = 0.0
-                self.backgroundColor = .rgb(200,200,200)
+                self.backgroundColor = .rgb(51,51,51)
             }
             else if oldValue != .temporaryUnselectable && selectableState == .temporaryUnselectable {
                 UIView.animate(withDuration: 0.1) {
@@ -66,7 +66,7 @@ class Key: UIView {
         self.keyType = type
         super.init(frame: CGRect.zero)
         label.text = letter
-        label.textColor = .rgb(90,139,89)
+        label.textColor = .rgb(51,51,51)
         if UIScreen.main.isiPadPortrait || UIScreen.main.isiPadLandscape {
             label.font = .mainFont(.light, 12.scaled)
         }
@@ -76,7 +76,9 @@ class Key: UIView {
         label.textAlignment = .center
         
         label.addToView(self, .left(1.scaled.pad), .right(1.scaled.pad), .centerY)
-        self.backgroundColor = .rgb(255,255,255, 0.61)
+        self.backgroundColor = .white
+        self.layer.borderWidth = 1.0
+        self.layer.borderColor = UIColor.rgb(112,112,112).cgColor
     }
     // round corners when updating the key view
     override func layoutSubviews() {

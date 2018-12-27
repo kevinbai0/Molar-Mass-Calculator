@@ -7,9 +7,10 @@
 //
 
 import UIKit
+import SpriteKit
 
 enum ApplicationState {
-    case defaultState, selectedTextField, showingPreResults, showingResults
+    case defaultState, selectedTextField, showingPreResults, showingResults, showingIanniView
 }
 
 class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelegate, SolutionVCDelegate, IanniVCDelegate {
@@ -19,6 +20,8 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     let solutionVC: SolutionVC = SolutionVC()
     let onboardingVC = OnboardingVC()
     let ianniVC = IanniVC()
+    let skView = SKView(frame: .zero)
+    var backgroundAnimationScene: BackgroundAnimation?
     
     let transition = FillThroughAnimation()
     
@@ -28,10 +31,12 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
             if oldValue != .defaultState && state == .defaultState {
                 self.homeView.titleLabel.x1Anchor = .left(20.scaled.pad)
                 self.homeView.titleLabel.x2Anchor = .right(20.scaled.pad)
-                homeView.formulaInputView.y1Anchor = .centerY
+                homeView.formulaInputView.y1Anchor = .bottom(20.scaled.pad)
+                homeView.formulaInputView.heightALAnchor = .height(50.scaled.constant)
                 homeView.formulaInputView.x1Anchor = .left(20.scaled.pad)
                 homeView.formulaInputView.x2Anchor = .right(20.scaled.pad)
-                homeView.helpButton.y1Anchor = .bottom(20.scaled.pad)
+                homeView.formulaInputView.layer.cornerRadius = 10
+                homeView.formulaInputView.state = .regular
 
                 homeView.formulaInputView.inputTextField.resignFirstResponder()
                 periodicTable.currentFormulaString = ""
@@ -39,21 +44,19 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
                 self.keyboardView.setKeyboardState(state: .regularKeyboard, keyText: "")
                 updateMolarMassCalculations()
                 UIView.animate(withDuration: 0.5) {
+                    self.homeView.alpha = 1.0
                     self.view.layoutIfNeeded()
                 }
             }
             else if oldValue != .selectedTextField && state == .selectedTextField {
-                if UIScreen.main.isiPadPortrait || UIScreen.main.isiPadLandscape {
-                    homeView.formulaInputView.y1Anchor = .bottom((self.keyboardView.keyboardHeight + 35.scaled).pad)
-                }
-                else {
-                    homeView.formulaInputView.y1Anchor = .bottom((self.keyboardView.keyboardHeight).pad)
-                }
-                homeView.formulaInputView.x1Anchor = .left(self.keyboardView.qwertyKeysView.keyHorizontalPadding.pad)
-                homeView.formulaInputView.x2Anchor = .right(self.keyboardView.qwertyKeysView.keyHorizontalPadding.pad)
+                homeView.formulaInputView.y1Anchor = .bottom
+                homeView.formulaInputView.state = .showingTextField
+                homeView.formulaInputView.heightALAnchor = .height((self.view.frame.height / 2).constant)
+                homeView.formulaInputView.layer.cornerRadius = 30
+                homeView.formulaInputView.x1Anchor = .left
+                homeView.formulaInputView.x2Anchor = .right
                 self.homeView.titleLabel.x2Anchor = .right(homeView.left, 20.scaled.pad)
                 self.homeView.titleLabel.x1Anchor = .left(homeView.left, (-self.view.frame.width + 20.scaled).pad)
-                self.homeView.helpButton.y1Anchor = .top(self.view.bottom)
                 self.solutionVC.state = .showingPreview
                 UIView.animate(withDuration: 0.2) {
                     self.view.layoutIfNeeded()
@@ -69,6 +72,11 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
                 self.homeView.formulaInputView.y1Anchor = .bottom(20.scaled.pad)
                 UIView.animate(withDuration: 0.5) {
                     self.view.layoutIfNeeded()
+                }
+            }
+            else if oldValue != .showingIanniView && state == .showingIanniView {
+                UIView.animate(withDuration: 0.5) {
+                    self.homeView.alpha = 0
                 }
             }
         }
@@ -93,11 +101,12 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
         let table = PeriodicTable()
         table.loadTable()
         super.init(nibName: nil, bundle: nil)
+        skView.addToView(self.view, .left, .right, .top, .bottom)
         self.periodicTable = table
         
         self.keyboardView.delegate = self
-        
-        homeView.helpButton.addTarget(self, action: #selector(showOnboarding), for: .touchUpInside)
+        self.homeView.addToView(self.view, .left, .right, .top, .bottom)
+
         homeView.formulaInputView.inputTextField.inputView = keyboardView
         homeView.delegate = self
         self.addChildViewController(solutionVC)
@@ -107,25 +116,12 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        var big = false
-        DispatchQueue.main.async {
-            let _ = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true, block: { (_) in
-                if big {
-                    UIView.animate(withDuration: 0.5, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
-                        self.homeView.subTitleButton.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
-                    }, completion: nil)
-                }
-                else {
-                    UIView.animate(withDuration: 0.5, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
-                        self.homeView.subTitleButton.transform = .identity
-                    }, completion: nil)
-                }
-                big = !big
-            })
-        }
         
         self.homeView.subTitleButton.addTarget(self, action: #selector(showIanniView(sender:)), for: .touchUpInside)
         ianniVC.delegate = self
+        
+        backgroundAnimationScene = BackgroundAnimation(size: self.view.frame.size)
+        skView.presentScene(backgroundAnimationScene)
     }
     func homeViewDidSelectInputField() {
         self.state = .selectedTextField
@@ -184,7 +180,7 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     func updateMolarMassCalculations() {
         let molarMass = periodicTable.calculateMolarMassWithPercents(formula: periodicTable.currentFormulaString + periodicTable.previewString)
         UIView.animate(withDuration: 0.2) {
-            self.solutionVC.setMolarMassLabel(value: molarMass.1)
+            self.homeView.formulaInputView.setMolarMassLabel(value: molarMass.1)
             self.solutionVC.sortedElements = molarMass.0.sorted(by: { $0.0.atomicNumber < $1.0.atomicNumber })
         }
         if molarMass.1 != 0 && self.state == .selectedTextField {
@@ -201,12 +197,8 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
         self.present(onboardingVC, animated: true, completion: nil)
     }
     
-    override func loadView() {
-        print(UIScreen.main.bounds)
-        self.view = homeView
-    }
-    
     @objc func showIanniView(sender: UIButton) {
+        self.state = .showingIanniView
         self.addChildViewController(ianniVC)
         ianniVC.view.addToView(self.view, .left, .right, .top, .bottom)
     }
@@ -225,6 +217,7 @@ extension HomeViewController {
     func ianniVCRemoveFromSuperview() {
         ianniVC.removeFromParentViewController()
         ianniVC.view.removeFromSuperview()
+        self.state = .defaultState
     }
     
     

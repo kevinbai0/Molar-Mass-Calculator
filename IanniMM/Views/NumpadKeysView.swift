@@ -35,7 +35,7 @@ class NumpadKeysView: UIView {
             else if UIScreen.main.isiPadPortrait || UIScreen.main.isiPadLandscape {
                 return 65.scaled
             }
-            return 57.scaled
+            return 29.scaled
         }
     }
     var keyHeight: CGFloat {
@@ -43,7 +43,7 @@ class NumpadKeysView: UIView {
             if UIScreen.main.isiPadPortrait || UIScreen.main.isiPadLandscape {
                 return 25.scaled
             }
-            return 40.scaled
+            return 37.scaled
         }
     }
     

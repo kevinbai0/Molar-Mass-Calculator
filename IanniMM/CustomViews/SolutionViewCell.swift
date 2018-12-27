@@ -12,10 +12,10 @@ class SolutionViewCell: UITableViewCell {
     /* Properties */
     static var cellIdentifer = "SolutionViewCell"
     
-    var elementNameLabel = UILabel.create("", .rgb(197,255,195), .mainFont(.regular, 24.scaled))
-    let atomsLabel = UILabel.create("", .rgb(197,255,195), .mainFont(.regular, 24.scaled))
-    let molarMassLabel = UILabel.create("", .rgb(197,255,195), .mainFont(.extraLight, 16.scaled))
-    let percentLabel = UILabel.create("", .rgb(197,255,195), .mainFont(.extraLight, 16.scaled))
+    var elementNameLabel = UILabel.create("", .rgb(51,51,51), .mainFont(.regular, 18.scaled))
+    let atomsLabel = UILabel.create("", .rgb(51,51,51), .mainFont(.regular, 18.scaled))
+    let molarMassLabel = UILabel.create("", .rgb(51,51,51), .mainFont(.regular, 12.scaled))
+    let percentLabel = UILabel.create("", .rgb(51,51,51), .mainFont(.regular, 12.scaled))
     
     // variables for the cell and use getters and setters in order to set the labels when label is changed
     var elementName: String? {
@@ -48,7 +48,7 @@ class SolutionViewCell: UITableViewCell {
             percentLabel.text = "\(rounded)% mass"
         }
     }
-    
+    let containerView = UIView()
     /* Initializers*/
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
@@ -66,11 +66,27 @@ class SolutionViewCell: UITableViewCell {
             molarMassLabel.font = .mainFont(.extraLight, 12.scaled)
             percentLabel.font = .mainFont(.extraLight, 12.scaled)
         }
-        elementNameLabel.addToView(self, .left(20.scaled.pad), .top)
-        atomsLabel.addToView(self, .right(20.scaled.pad), .top)
-        molarMassLabel.addToView(self, .left(20.scaled.pad), .top(elementNameLabel.bottom))
-        percentLabel.addToView(self, .right(20.scaled.pad), .top(atomsLabel.bottom))
-        self.backgroundColor = .clear
+        
+        containerView.addToView(self, .left(10.scaled.pad), .right(10.scaled.pad), .top(6.scaled.pad), .bottom(6.scaled.pad))
+        
+        elementNameLabel.addToView(containerView, .left(20.scaled.pad), .bottom(self.centerY))
+        atomsLabel.addToView(containerView, .right(20.scaled.pad), .bottom(self.centerY))
+        molarMassLabel.addToView(containerView, .left(20.scaled.pad), .top(self.centerY))
+        percentLabel.addToView(containerView, .right(20.scaled.pad), .top(self.centerY))
+        
+        containerView.backgroundColor = .white
+        containerView.layer.shadowColor = UIColor.black.cgColor
+        containerView.layer.shadowOffset = CGSize(width: 0, height: 3)
+        containerView.layer.shadowRadius = 10
+        containerView.layer.shadowOpacity = 0.16
+        
+        self.backgroundColor = .white
+        
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        containerView.layer.shadowPath = UIBezierPath(rect: containerView.bounds).cgPath
     }
     
     /* Methods */

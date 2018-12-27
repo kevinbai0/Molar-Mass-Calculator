@@ -21,15 +21,22 @@ struct Nunito: CustomFontType {
     let acceptedWeights: [FontWeight] = [.extraLight, .extraLightItalic, .light, .lightItalic, .regular, .regularItalic, .semiBold, .semiBoldItalic, .bold, .boldItalic, .extraBold, .extraBoldItalic, .black, .blackItalic]
 }
 
+struct SourceCodePro: CustomFontType {
+    let prefix: String = "SourceCodePro"
+    let acceptedWeights: [FontWeight] = [
+        .extraLight, .light, .regular, .medium, .semiBold, .bold, .black
+    ]
+}
+
 struct SFCompactText: CustomFontType {
     let prefix = "SFCompactText"
     let acceptedWeights: [FontWeight] = [.light, .lightItalic, .regular, .regularItalic, .medium, .mediumItalic, .semiBold, .semiBoldItalic, .bold, .boldItalic, .heavy, .heavyItalic]
 }
 
 extension UIFont {
-    static var main: CustomFontType = Nunito()
-    static var secondary: CustomFontType = Nunito()
-    static var highlight: CustomFontType = Nunito()
+    static var main: CustomFontType = SourceCodePro()
+    static var secondary: CustomFontType = SourceCodePro()
+    static var highlight: CustomFontType = SourceCodePro()
     
     class func dosis(_ type: FontWeight, _ size: CGFloat) -> UIFont? {
         return UIFont(name: "Dosis-\(type.rawValue.1)", size: size)

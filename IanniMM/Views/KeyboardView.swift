@@ -28,9 +28,9 @@ class KeyboardView: UIView {
     var keyboardHeight: CGFloat {
         get {
             if UIScreen.main.isiPhoneXFamily {
-                return qwertyKeysView.keyHeight * 4 + qwertyKeysView.keyVerticalPadding * 4 + qwertyKeysView.keyTopSpacing + 20.scaled
+                return qwertyKeysView.keyHeight * 5 + qwertyKeysView.keyVerticalPadding * 5 + qwertyKeysView.keyTopSpacing + 20.scaled
             }
-            return qwertyKeysView.keyHeight * 4 + qwertyKeysView.keyVerticalPadding * 4 + qwertyKeysView.keyTopSpacing
+            return qwertyKeysView.keyHeight * 5 + qwertyKeysView.keyVerticalPadding * 5 + qwertyKeysView.keyTopSpacing
         }
     }
     
@@ -79,21 +79,13 @@ class KeyboardView: UIView {
     init() {
         super.init(frame: .zero)
         // place qwerty row keys
-        let linearColorGradient = CAGradientLayer()
-        linearColorGradient.colors = [UIColor.rgb(91,160,94).cgColor, UIColor.rgb(115,206,160).cgColor]
-        self.layer.addSublayer(linearColorGradient)
-        linearColorGradient.frame = CGRect(x: 0, y: -UIScreen.main.bounds.height + keyboardHeight, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-        let alphaLayer = CALayer()
-        alphaLayer.backgroundColor = UIColor.white.withAlphaComponent(0.21).cgColor
-       // self.layer.addSublayer(alphaLayer)
-        alphaLayer.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: keyboardHeight)
         
         self.clipsToBounds = true
         qwertyKeysView.addToView(self, .left, .right, .top, .bottom)
         numpadKeysView.addToView(self, .left, .right, .top, .bottom)
         numpadKeysView.isHidden = true
         numpadKeysView.alpha = 0.0
-        
+        self.backgroundColor = .white
         // set frame
         self.frame = CGRect(x: 0, y: UIScreen.main.bounds.height - keyboardHeight, width: UIScreen.main.bounds.width, height: keyboardHeight)
     }

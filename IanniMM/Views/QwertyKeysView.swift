@@ -27,7 +27,7 @@ class QwertyKeysView: UIView {
             if UIScreen.main.isiPadPortrait || UIScreen.main.isiPadLandscape {
                 return 25.scaled
             }
-            return 40.scaled
+            return 32.scaled
         }
     }
     
@@ -51,6 +51,16 @@ class QwertyKeysView: UIView {
 
     
     var keys: [Key] = [
+        Key(letter: "0"),
+        Key(letter: "1"),
+        Key(letter: "2"),
+        Key(letter: "3"),
+        Key(letter: "4"),
+        Key(letter: "5"),
+        Key(letter: "6"),
+        Key(letter: "7"),
+        Key(letter: "8"),
+        Key(letter: "9"),
         Key(letter: "Q"),
         Key(letter: "W"),
         Key(letter: "E"),
@@ -77,10 +87,13 @@ class QwertyKeysView: UIView {
         Key(letter: "B"),
         Key(letter: "N"),
         Key(letter: "M"),
-        Key(letter: "123", type: .control),
-        Key(letter: "Done", type: .control),
+        Key(letter: "⇧", type: .control),
         Key(letter: "←", type: .control),
-        Key(letter: "⇧", type: .control)
+        Key(letter: "•"),
+        Key(letter: "("),
+        Key(letter: ")"),
+        Key(letter: "Del All", type: .control),
+        Key(letter: "Done", type: .control)
     ]
     
     required init?(coder aDecoder: NSCoder) { fatalError() }
@@ -92,29 +105,38 @@ class QwertyKeysView: UIView {
         for i in 1..<10 {
             keys[i].addToView(self, .left(keyHorizontalPadding.pad, keys[i-1].right), .top(keys[i-1].top), .width(keyWidth.constant), .height(keyHeight.constant))
         }
-        let secondRowSideSpacing = (width - (9 * keyWidth + 8 * keyHorizontalPadding)) / 2
-        keys[10].addToView(self, .left(secondRowSideSpacing.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[0].bottom, self.keyVerticalPadding.pad))
-        for i in 11..<19 {
-            keys[i].addToView(self, .left(keys[i-1].right, keyHorizontalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[0].bottom, self.keyVerticalPadding.pad))
+        keys[10].addToView(self, .left(keyHorizontalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[0].bottom, self.keyVerticalPadding.pad))
+        for i in 11..<20 {
+            keys[i].addToView(self, .left(keyHorizontalPadding.pad, keys[i-1].right), .top(keys[i-1].top), .width(keyWidth.constant), .height(keyHeight.constant))
         }
-        let thirdRowSideSpacing = (width - (7 * keyWidth + 6 * keyHorizontalPadding)) / 2
-        keys[19].addToView(self, .left(thirdRowSideSpacing.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[10].bottom, keyVerticalPadding.pad))
-        for i in 20..<26 {
-            keys[i].addToView(self, .left(keys[i-1].right, keyHorizontalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[10].bottom, keyVerticalPadding.pad))
+        let thirdRowSideSpacing = (width - (9 * keyWidth + 8 * keyHorizontalPadding)) / 2
+        keys[20].addToView(self, .left(thirdRowSideSpacing.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[10].bottom, self.keyVerticalPadding.pad))
+        for i in 21..<29 {
+            keys[i].addToView(self, .left(keys[i-1].right, keyHorizontalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[10].bottom, self.keyVerticalPadding.pad))
         }
+        let fourthRowSideSpacing = (width - (7 * keyWidth + 6 * keyHorizontalPadding)) / 2
+        keys[29].addToView(self, .left(fourthRowSideSpacing.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[20].bottom, keyVerticalPadding.pad))
+        for i in 30..<36 {
+            keys[i].addToView(self, .left(keys[i-1].right, keyHorizontalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[20].bottom, keyVerticalPadding.pad))
+        }
+        //shift and delete
+        keys[36].addToView(self, .left(keyHorizontalPadding.pad), .right(keys[29].left, keyHorizontalPadding.pad), .height(keyHeight.constant), .top(keys[29].top))
+        keys[37].addToView(self, .left(keyHorizontalPadding.pad, keys[35].right), .right(keyHorizontalPadding.pad), .height(keyHeight.constant), .top(keys[35].top))
+        // •, (, and )
+        keys[38].addToView(self, .left(keyHorizontalPadding.pad), .top(keys[36].bottom, keyVerticalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant))
+        keys[39].addToView(self, .left(keys[38].right, keyHorizontalPadding.pad), .top(keys[36].bottom, keyVerticalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant))
+        keys[40].addToView(self, .left(keys[39].right, keyHorizontalPadding.pad), .top(keys[36].bottom, keyVerticalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant))
         
-        // 123 numpad button
-        keys[26].addToView(self, .left(keyHorizontalPadding.pad), .right(self.centerX, (keyHorizontalPadding / 2).pad), .height(keyHeight.constant), .top(keys[19].bottom, keyVerticalPadding.pad))
+        // delete all and done button
+        keys[41].addToView(self, .left(keys[40].right, keyHorizontalPadding.pad), .centerX, .height(keyHeight.constant), .top(keys[38].top))
+        keys[42].addToView(self, .left(keys[41].right, keyHorizontalPadding.pad), .right(keyHorizontalPadding.pad), .top(keys[38].top), .height(keyHeight.constant))
         // Done button
-        keys[27].addToView(self, .right(keyHorizontalPadding.pad), .left(self.centerX, (keyHorizontalPadding / 2).pad), .height(keyHeight.constant), .top(keys[19].bottom, keyVerticalPadding.pad))
-        // ← button
-        keys[28].addToView(self, .right(keyHorizontalPadding.pad), .left(keys[25].right, (2 * keyHorizontalPadding).pad), .height(keyHeight.constant), .top(keys[19].top))
         // ⇧ button
         //keys[29].addToView(self, .left(keyHorizontalPadding.pad), .right(keys[19].left, (keyHorizontalPadding * 2).pad), .top(keys[19].top), .height(keyHeight.constant))
         
         // set keys q and j to never selectable since those are never used in the periodic table
-        keys[0].selectableState = .permanentUnselectable
-        keys[16].selectableState = .permanentUnselectable
+        keys[10].selectableState = .permanentUnselectable
+        keys[26].selectableState = .permanentUnselectable
     }
     
     func hideNonAutocompleteOptions(autocompleteOptions: [String]) {

@@ -23,32 +23,23 @@ class SolutionVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
                 UIView.animate(withDuration: 0.5) {
                     self.view.layoutIfNeeded()
                 }
-                self.molarMassLabelViewContainer.x1Anchor = .right(self.view.left)
-                self.molarMassLabel.x1Anchor = .left(self.view.right)
-                self.molarMassLabel.x2Anchor = .right(self.view.right, (UIScreen.main.isiPadLandscape ? -UIScreen.main.bounds.height : -UIScreen.main.bounds.width).pad)
                 self.homeButton.y1Anchor = .bottom(self.view.top)
                 UIView.animate(withDuration: 0.5, delay: 0.01, animations: {
                     self.view.layoutIfNeeded()
                 }) { _ in
-                    self.molarMassLabel.text = ""
                     self.view.isHidden = true
                 }
             }
             else if state != .shown && newValue == .shown {
                 self.view.isHidden = false
-                molarMassLabel.x1Anchor = .left(molarMassLabelViewContainer.left, 10.scaled.pad)
-                molarMassLabel.x2Anchor = nil
-                molarMassLabelViewContainer.x1Anchor = .left
-                molarMassLabelViewContainer.widthALAnchor = .width(20.scaled.constant)
             }
             else if state != .showingPreview && newValue == .showingPreview {
                 self.view.isHidden = false
-                molarMassLabelViewContainer.y1Anchor = .top(molarMassLabel.top, (-5).scaled.pad)
                 self.homeButton.y2Anchor = nil
                 self.homeButton.y1Anchor = .top(38.scaled.pad)
                 self.tableView.x1Anchor = .left
                 self.tableView.x2Anchor = .right
-                self.tableView.y2Anchor = .bottom(molarMassLabelViewContainer.top, 15.scaled.pad)
+                self.tableView.y2Anchor = .bottom(15.scaled.pad)
 
                 UIView.animate(withDuration: 0.5) {
                     self.view.layoutIfNeeded()
@@ -66,29 +57,22 @@ class SolutionVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     }
     var molarMass: Double?
     let tableView = UITableView()
-    let molarMassLabelViewContainer = UIView()
-    var molarMassLabel = UILabel.create("", .rgb(197,255,195), .mainFont(.light, 18.scaled))
     /* Initializers*/
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     init() {
         super.init(nibName: nil, bundle: nil)
-        molarMassLabelViewContainer.addToView(self.view, .bottom, .right(self.view.left), .width(0.constant), .top(molarMassLabelViewContainer.bottom))
-        molarMassLabelViewContainer.backgroundColor = .rgb(93,165,102)
-        molarMassLabel.addToView(self.view, .right(molarMassLabelViewContainer.right), .bottom(molarMassLabelViewContainer.bottom, 5.scaled.pad))
-        
         tableView.backgroundColor = .clear
         tableView.register(SolutionViewCell.self, forCellReuseIdentifier: SolutionViewCell.cellIdentifer)
-        tableView.rowHeight = 60.scaled
+        tableView.rowHeight = 70.scaled
         tableView.separatorStyle = .none
         tableView.allowsSelection = false
+        tableView.contentInset = UIEdgeInsets(top: 10.scaled, left: 0, bottom: 10.scaled, right: 0)
         self.tableView.delegate = self
         self.tableView.dataSource = self
         
-        homeButton.setTitle("Home", for: [])
-        homeButton.setTitleColor(.rgb(197,255,195), for: [])
-        homeButton.setImage(createArrowImage(height: 16.scaled), for: [])
-        homeButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5.scaled, bottom: 0, right: -5)
-        homeButton.titleLabel?.font = .mainFont(.extraLight, 18.scaled)
+        homeButton.setTitle("< Home", for: [])
+        homeButton.setTitleColor(.rgb(51,51,51), for: [])
+        homeButton.titleLabel?.font = .mainFont(.regular, 18.scaled)
         homeButton.titleLabel?.adjustsFontSizeToFitWidth = true
         
         homeButton.addTarget(self, action: #selector(buttonTouchDown(sender:)), for: .touchDown)
@@ -125,24 +109,6 @@ class SolutionVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         self.molarMass = result.1
 
         tableView.reloadData()
-    }
-    
-    func setMolarMassLabel(value: Double) {
-        self.molarMass = value
-        if "\(value) g/mol" != self.molarMassLabel.text {
-            UIView.animate(withDuration: 0.2, delay: 0.0, options: .curveEaseIn, animations: {
-                self.molarMassLabel.alpha = 0.0
-            }) { _ in
-                self.molarMassLabel.text = "\(value) g/mol"
-                self.molarMassLabelViewContainer.widthALAnchor = .width(self.molarMassLabel.width, 20.scaled.pad)
-                UIView.animate(withDuration: 0.2, delay: 0.0, options: .curveEaseOut, animations: {
-                    self.view.layoutIfNeeded()
-                }, completion: nil)
-                UIView.animate(withDuration: 0.2, delay: 0.1, options: .curveEaseOut, animations: {
-                    self.molarMassLabel.alpha = 1.0
-                }, completion: nil)
-            }
-        }
     }
     
     override func loadView() {

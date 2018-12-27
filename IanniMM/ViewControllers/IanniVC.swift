@@ -18,38 +18,46 @@ class IanniVC: UIViewController {
     }
     
     let ianniImageView = UIImageView(image: UIImage(named: "ianni"))
-    let titleLabel = UILabel.create("This is Frank Ianni", .white, .mainFont(.bold, 24.scaled))
-    let separatorLine = UIView()
+    let titleLabel = UILabel.create("This is Frank Ianni", .rgb(51,51,51), .mainFont(.bold, 24.scaled))
+    
+    let paragraphContainerView = UIView()
     let paragraphTextView = UITextView()
-    let signOffLabel = UILabel.create("- SCH3UP Sem. 2, Per. 3, 2018", .white, .mainFont(.bold, 14.scaled))
     let closeButton = UIButton()
     var delegate: IanniVCDelegate?
     
     init() {
         super.init(nibName: nil, bundle: nil)
     }
-    let gradientLayer = CAGradientLayer()
     
     var paragraphString: NSMutableAttributedString {
         let string = NSMutableAttributedString()
-        var fontSize = 18.scaled
+        var fontSize = 14.scaled
         if UIScreen.main.isiPhoneXR {
-            fontSize = 22.scaled
+            fontSize = 15.scaled
         }
-        let part1 = NSAttributedString(string: "Frank Ianni is a high school chemistry teacher at St. Ignatius High School. He needed a molar mass calculator because he’s too lazy to solve molar masses by himself ", attributes: [NSAttributedStringKey.font: UIFont.mainFont(.light, fontSize) ?? UIFont.systemFont(ofSize: fontSize)])
-        let part2 = NSAttributedString(string: "(his laziness really shows on the soccer field)", attributes: [.font: UIFont.mainFont(.black, fontSize) ?? UIFont.systemFont(ofSize: fontSize)])
-        let part3 = NSAttributedString(string: ". But we figured even more people needed a molar mass calculator like he did. So here you go, a simple molar mass calculator for all you students and teachers out there.", attributes: [.font: UIFont.mainFont(.light, fontSize) ?? UIFont.systemFont(ofSize: fontSize)])
+        let paragraphAttribute = NSMutableParagraphStyle()
+        paragraphAttribute.lineSpacing = 4.scaled
+        let rightParagraphStyle = NSMutableParagraphStyle()
+        rightParagraphStyle.lineSpacing = 4.scaled
+        rightParagraphStyle.alignment = .right
+        let part1 = NSAttributedString(string: "Frank Ianni is a high school chemistry teacher at St. Ignatius High School. He needed a molar mass calculator because he’s too lazy to solve molar masses by himself ", attributes: [.font: UIFont.mainFont(.regular, fontSize) ?? UIFont.systemFont(ofSize: fontSize), .paragraphStyle: paragraphAttribute])
+        let part2 = NSAttributedString(string: "(his laziness really shows on the soccer field)", attributes: [.font: UIFont.mainFont(.regular, fontSize) ?? UIFont.systemFont(ofSize: fontSize), .paragraphStyle: paragraphAttribute])
+        let part3 = NSAttributedString(string: ". But we figured even more people needed a molar mass calculator like he did. So here you go, a simple molar mass calculator for all you students and teachers out there.", attributes: [.font: UIFont.mainFont(.regular, fontSize) ?? UIFont.systemFont(ofSize: fontSize), .paragraphStyle: paragraphAttribute])
+        let part4 = NSAttributedString(string: "\n\n- SCH3UP Sem. 2, Per. 3, 2018", attributes: [.font: UIFont.mainFont(.regular, 12.scaled) ?? UIFont.systemFont(ofSize: 12.scaled), .paragraphStyle: rightParagraphStyle])
         
         string.append(part1)
         string.append(part2)
         string.append(part3)
+        string.append(part4)
         
         return string
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        closeButton.setTitle("x", for: [])
-        
+        closeButton.setTitle("< Home", for: [])
+        closeButton.titleLabel?.font = .mainFont(.regular, 18.scaled)
+        closeButton.setTitleColor(.rgb(51,51,51), for: [])
+        paragraphTextView.textContainerInset = UIEdgeInsets(top: 15.scaled, left: 15.scaled, bottom: 15.scaled, right: 15.scaled)
         paragraphTextView.isEditable = false
         paragraphTextView.isScrollEnabled = false
         paragraphTextView.attributedText = paragraphString
@@ -63,17 +71,13 @@ class IanniVC: UIViewController {
     
     override func loadView() {
         super.loadView()
-        self.view.backgroundColor = .white
-        gradientLayer.colors = [UIColor.rgb(91,160,94).cgColor, UIColor.rgb(115,206,160).cgColor]
-        self.view.layer.addSublayer(gradientLayer)
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        gradientLayer.frame = self.view.frame
         ianniImageView.layer.cornerRadius = ianniImageView.frame.width / 2
-        closeButton.layer.cornerRadius = closeButton.frame.width / 2
         paragraphTextView.setContentOffset(.zero, animated: false)
+        paragraphContainerView.layer.shadowPath = UIBezierPath(rect: paragraphContainerView.bounds).cgPath
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -95,12 +99,12 @@ class IanniVC: UIViewController {
     }
     
     func setLayout() {
-        ianniImageView.addToView(self.view, .left(20.scaled.pad), .width(0.25.ratio), .height(ianniImageView.width), .top(48.scaled.pad))
-        titleLabel.addToView(self.view, .left(ianniImageView.right, 15.scaled.pad), .right(20.scaled.pad), .centerY(ianniImageView.centerY))
-        separatorLine.addToView(self.view, .centerX, .width(0.9.ratio), .top(ianniImageView.bottom, 20.scaled.pad), .height(1.constant))
-        paragraphTextView.addToView(self.view, .top(separatorLine.bottom), .bottom(80.scaled.pad), .width(0.9.ratio), .centerX)
-        signOffLabel.addToView(self.view, .top(paragraphTextView.bottom), .width(0.9.ratio), .centerX)
-        closeButton.addToView(self.view, .centerX, .bottom(UIScreen.main.isiPhoneXFamily ? 20.scaled.pad : 10.scaled.pad), .width(50.scaled.constant), .height(50.scaled.constant))
+        ianniImageView.addToView(self.view, .right(20.scaled.pad), .width(0.25.ratio), .height(ianniImageView.width), .top(64.scaled.pad))
+        titleLabel.addToView(self.view, .left(20.scaled.pad), .right(ianniImageView.left, 15.scaled.pad), .centerY(ianniImageView.centerY))
+        
+        paragraphContainerView.addToView(self.view, .top(titleLabel.bottom, 20.scaled.pad), .bottom(20.scaled.pad), .width(0.9.ratio), .centerX)
+        paragraphTextView.addToView(paragraphContainerView, .left, .right, .top, .bottom)
+        closeButton.addToView(self.view, .left(20.scaled.pad), .top(28.scaled.pad))
     }
     
     
@@ -110,67 +114,46 @@ class IanniVC: UIViewController {
         
         ianniImageView.clipsToBounds = true
         
-        separatorLine.backgroundColor = .white
-        
-        paragraphTextView.backgroundColor = .clear
-        paragraphTextView.textColor = .white
+        paragraphTextView.textColor = .rgb(51,51,51)
         paragraphTextView.setContentOffset(.zero, animated: false)
         
-        signOffLabel.textAlignment = .right
-        
-        closeButton.setTitleColor(.white, for: [])
-        closeButton.titleLabel?.font = .mainFont(.light, 36.scaled)
+        paragraphContainerView.backgroundColor = .white
+        paragraphContainerView.layer.shadowColor = UIColor.black.cgColor
+        paragraphContainerView.layer.shadowOffset = CGSize(width: 0, height: 3)
+        paragraphContainerView.layer.shadowRadius = 10
+        paragraphContainerView.layer.shadowOpacity = 0.16
     }
     func hideElements() {
-        ianniImageView.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
-        titleLabel.transform = CGAffineTransform(translationX: UIScreen.main.bounds.width, y: 0)
-        separatorLine.transform = CGAffineTransform(translationX: 0, y:  -UIScreen.main.bounds.height)
-        paragraphTextView.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
-        signOffLabel.transform = CGAffineTransform(translationX: UIScreen.main.bounds.width, y: 0)
-        closeButton.transform = CGAffineTransform(translationX: 0, y: UIScreen.main.bounds.height / 2)
+        ianniImageView.transform = CGAffineTransform(translationX: UIScreen.main.bounds.width, y: 0)
+        titleLabel.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
+        paragraphContainerView.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
+        closeButton.transform = CGAffineTransform(translationX: 0, y: -UIScreen.main.bounds.height / 3)
     }
     func transitionElementsIn() {
         UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-            self.separatorLine.transform = .identity
+            self.closeButton.transform = .identity
         }, completion: { _ in
-            UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-                self.ianniImageView.transform = .identity
-            })
             UIView.animate(withDuration: 0.5, delay: 0.2, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
+                self.ianniImageView.transform = .identity
                 self.titleLabel.transform = .identity
             }, completion: { _ in
                 UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-                    self.paragraphTextView.transform = .identity
+                    self.paragraphContainerView.transform = .identity
                 })
-                UIView.animate(withDuration: 0.5, delay: 0.2, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-                    self.signOffLabel.transform = .identity
-                })
-                UIView.animate(withDuration: 0.5, delay: 0.4, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-                    self.closeButton.transform = .identity
-                })
-                
             })
         })
     }
     
     func transitionElementsOut(completion: @escaping () -> ()) {
         UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-            self.closeButton.transform = CGAffineTransform(translationX: 0, y: UIScreen.main.bounds.height / 2)
-        })
-        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-            self.signOffLabel.transform = CGAffineTransform(translationX: UIScreen.main.bounds.width, y: 0)
-        })
-        UIView.animate(withDuration: 0.5, delay: 0.2, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-            self.paragraphTextView.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
+            self.paragraphContainerView.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
         }, completion: { _ in
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-                self.titleLabel.transform = CGAffineTransform(translationX: UIScreen.main.bounds.width, y: 0)
-            })
-            UIView.animate(withDuration: 0.5, delay: 0.2, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-                self.ianniImageView.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
+                self.titleLabel.transform = CGAffineTransform(translationX: -UIScreen.main.bounds.width, y: 0)
+                self.ianniImageView.transform = CGAffineTransform(translationX: UIScreen.main.bounds.width, y: 0)
             })
             UIView.animate(withDuration: 0.5, delay: 0.4, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: .curveEaseInOut, animations: {
-                self.separatorLine.transform = CGAffineTransform(translationX: 0, y:  -UIScreen.main.bounds.height)
+                self.closeButton.transform = CGAffineTransform(translationX: 0, y: -UIScreen.main.bounds.height / 3)
             }, completion: { _ in
                 UIView.animate(withDuration: 0.5, animations: {
                     self.view.alpha = 0.0
