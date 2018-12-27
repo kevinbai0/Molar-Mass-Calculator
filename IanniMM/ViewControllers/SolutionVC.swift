@@ -131,6 +131,7 @@ class SolutionVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         cell.elementName = element.name
         cell.elementCount = count
         cell.molarMass = element.atomicMass
+        
         guard let mass = molarMass else {
             cell.percent = 0.0
             return cell

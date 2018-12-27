@@ -14,7 +14,7 @@ enum ApplicationState {
 }
 
 class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelegate, SolutionVCDelegate, IanniVCDelegate {
-    var periodicTable = PeriodicTable()
+    let periodicTable: PeriodicTable
     let homeView = HomeView()
     let keyboardView = KeyboardView()
     let solutionVC: SolutionVC = SolutionVC()
@@ -100,9 +100,9 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     init() {
         let table = PeriodicTable()
         table.loadTable()
+        self.periodicTable = table
         super.init(nibName: nil, bundle: nil)
         skView.addToView(self.view, .left, .right, .top, .bottom)
-        self.periodicTable = table
         
         self.keyboardView.delegate = self
         self.homeView.addToView(self.view, .left, .right, .top, .bottom)
@@ -120,7 +120,7 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
         self.homeView.subTitleButton.addTarget(self, action: #selector(showIanniView(sender:)), for: .touchUpInside)
         ianniVC.delegate = self
         
-        backgroundAnimationScene = BackgroundAnimation(size: self.view.frame.size)
+        backgroundAnimationScene = BackgroundAnimation(size: self.view.frame.size, periodicTable: self.periodicTable)
         skView.presentScene(backgroundAnimationScene)
     }
     func homeViewDidSelectInputField() {
@@ -181,6 +181,7 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
         let molarMass = periodicTable.calculateMolarMassWithPercents(formula: periodicTable.currentFormulaString + periodicTable.previewString)
         UIView.animate(withDuration: 0.2) {
             self.homeView.formulaInputView.setMolarMassLabel(value: molarMass.1)
+            self.solutionVC.molarMass = molarMass.1
             self.solutionVC.sortedElements = molarMass.0.sorted(by: { $0.0.atomicNumber < $1.0.atomicNumber })
         }
         if molarMass.1 != 0 && self.state == .selectedTextField {
@@ -206,7 +207,7 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     override func viewDidLayoutSubviews() {
         homeView.layoutSubviews()
         if !hasLoadedBefore {
-            showOnboarding()
+            //showOnboarding()
             UserDefaults.standard.set(true, forKey: "hasLoadedBefore")
         }
     }
@@ -219,6 +220,4 @@ extension HomeViewController {
         ianniVC.view.removeFromSuperview()
         self.state = .defaultState
     }
-    
-    
 }
