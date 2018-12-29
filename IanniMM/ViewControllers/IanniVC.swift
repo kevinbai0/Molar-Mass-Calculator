@@ -31,10 +31,8 @@ class IanniVC: UIViewController {
     
     var paragraphString: NSMutableAttributedString {
         let string = NSMutableAttributedString()
-        var fontSize = 14.scaled
-        if UIScreen.main.isiPhoneXR {
-            fontSize = 15.scaled
-        }
+        let fontSize = UIScreen.main.isiPhoneXFamily ? 13.5.scaled : 14.scaled
+
         let paragraphAttribute = NSMutableParagraphStyle()
         paragraphAttribute.lineSpacing = 4.scaled
         let rightParagraphStyle = NSMutableParagraphStyle()
@@ -99,10 +97,10 @@ class IanniVC: UIViewController {
     }
     
     func setLayout() {
-        ianniImageView.addToView(self.view, .right(20.scaled.pad), .width(0.25.ratio), .height(ianniImageView.width), .top(64.scaled.pad))
+        ianniImageView.addToView(self.view, .right(20.scaled.pad), .width(UIScreen.main.isiPadPortrait ? 0.2.ratio : 0.25.ratio), .height(ianniImageView.width), .top(64.scaled.pad))
         titleLabel.addToView(self.view, .left(20.scaled.pad), .right(ianniImageView.left, 15.scaled.pad), .centerY(ianniImageView.centerY))
         
-        paragraphContainerView.addToView(self.view, .top(titleLabel.bottom, 20.scaled.pad), .bottom(20.scaled.pad), .width(0.9.ratio), .centerX)
+        paragraphContainerView.addToView(self.view, .top(titleLabel.bottom, 20.scaled.pad), .bottom(UIScreen.main.isiPhoneXFamily ? 50.scaled.pad : 20.scaled.pad), .width(0.9.ratio), .centerX)
         paragraphTextView.addToView(paragraphContainerView, .left, .right, .top, .bottom)
         closeButton.addToView(self.view, .left(20.scaled.pad), .top(28.scaled.pad))
     }
@@ -111,6 +109,12 @@ class IanniVC: UIViewController {
     
     func setStyles() {
         titleLabel.numberOfLines = 2
+        if UIScreen.main.isiPhoneXFamily {
+            titleLabel.font = .mainFont(.bold, 22.scaled)
+        }
+        else if UIScreen.main.isiPadPortrait {
+            titleLabel.font = .mainFont(.bold, 30.scaled)
+        }
         
         ianniImageView.clipsToBounds = true
         

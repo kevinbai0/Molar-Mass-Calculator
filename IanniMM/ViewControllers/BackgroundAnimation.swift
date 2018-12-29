@@ -106,7 +106,7 @@ class BackgroundAnimation: SKScene {
         if let periodicNode = molecule as? PeriodicNode {
             if currentPeriodicElementNumber < self.periodicTable.elementSymbols.count {
                 periodicNode.elementSymbol = self.periodicTable.elementSymbols[currentPeriodicElementNumber]
-                periodicNode.elementNumberString = "\(self.currentPeriodicElementNumber)"
+                periodicNode.elementNumberString = "\(self.currentPeriodicElementNumber + 1)"
                 periodicNode.molarMassString = "\(String(format: "%.2f", self.periodicTable.elements[currentPeriodicElementNumber].atomicMass)) g/mol"
                 self.currentPeriodicElementNumber += 1
             }

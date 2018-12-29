@@ -35,6 +35,9 @@ class HomeView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate  {
         super.init(frame: CGRect.zero)
         formulaInputView.inputTextField.delegate = self
         
+        if UIScreen.main.isiPhoneXFamily {
+            titleLabel.font = .mainFont(.black, 38.scaled)
+        }
         
         subTitleButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5.scaled, bottom: 0, right: 5.scaled)
         subTitleButton.setTitle("For Frank Ianni", for: [])
@@ -52,7 +55,7 @@ class HomeView: UIView, UITextFieldDelegate, UIGestureRecognizerDelegate  {
         titleLabel.numberOfLines = 2
         titleLabel.addToView(self, .left(20.scaled.pad), .right(20.scaled.pad), .top(38.scaled.pad))
         subTitleButton.addToView(self, .left(titleLabel.left), .top(titleLabel.bottom, 20.scaled.pad), .width(0.5.ratio))
-        formulaInputView.addToView(self, .centerX, .left(20.scaled.pad), .right(20.scaled.pad), .bottom(20.scaled.pad), .height(50.scaled.constant))
+        formulaInputView.addToView(self, .centerX, .left(20.scaled.pad), .right(20.scaled.pad), .bottom(UIScreen.main.isiPhoneXFamily ? 50.scaled.pad : 20.scaled.pad), .height(50.scaled.constant))
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {

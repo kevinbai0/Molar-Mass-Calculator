@@ -45,7 +45,7 @@ class FormulaInputView: UIView {
         super.init(frame: CGRect.zero)
         
         if UIScreen.main.isiPhoneXFamily {
-            inputTextField.font = .mainFont(.light, 16.scaled)
+            inputTextField.font = .mainFont(.light, 14.scaled)
         }
         else {
             inputTextField.font = .mainFont(.light, 16.scaled)

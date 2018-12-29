@@ -55,10 +55,10 @@ class SolutionViewCell: UITableViewCell {
         super.init(style: .default, reuseIdentifier: SolutionViewCell.cellIdentifer)
         // add the labels to the view
         if UIScreen.main.isiPhoneXFamily {
-            elementNameLabel.font = .mainFont(.regular, 20.scaled)
-            atomsLabel.font = .mainFont(.regular, 20.scaled)
-            molarMassLabel.font = .mainFont(.extraLight, 14.scaled)
-            percentLabel.font = .mainFont(.extraLight, 14.scaled)
+            elementNameLabel.font = .mainFont(.regular, 16.scaled)
+            atomsLabel.font = .mainFont(.regular, 16.scaled)
+            molarMassLabel.font = .mainFont(.extraLight, 12.scaled)
+            percentLabel.font = .mainFont(.extraLight, 12.scaled)
         }
         else if UIScreen.main.isiPadPortrait || UIScreen.main.isiPadLandscape {
             elementNameLabel.font = .mainFont(.regular, 16.scaled)

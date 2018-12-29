@@ -31,7 +31,7 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
             if oldValue != .defaultState && state == .defaultState {
                 self.homeView.titleLabel.x1Anchor = .left(20.scaled.pad)
                 self.homeView.titleLabel.x2Anchor = .right(20.scaled.pad)
-                homeView.formulaInputView.y1Anchor = .bottom(20.scaled.pad)
+                homeView.formulaInputView.y1Anchor = .bottom(UIScreen.main.isiPhoneXFamily ? 50.scaled.pad : 20.scaled.pad)
                 homeView.formulaInputView.heightALAnchor = .height(50.scaled.constant)
                 homeView.formulaInputView.x1Anchor = .left(20.scaled.pad)
                 homeView.formulaInputView.x2Anchor = .right(20.scaled.pad)
@@ -106,7 +106,6 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
         
         self.keyboardView.delegate = self
         self.homeView.addToView(self.view, .left, .right, .top, .bottom)
-
         homeView.formulaInputView.inputTextField.inputView = keyboardView
         homeView.delegate = self
         self.addChildViewController(solutionVC)
