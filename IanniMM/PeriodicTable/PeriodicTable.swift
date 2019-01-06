@@ -67,7 +67,6 @@ class PeriodicTable {
             sum += solve.1
             Formulable.merge(originalDictionary: &elementsCount, with: solve.0)
         }
-        print(round(sum * 10000) / 10000)
         // round to 4 decimal places
         return (elementsCount, round(sum * 10000) / 10000)
     }

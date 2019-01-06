@@ -14,6 +14,7 @@ protocol KeyboardViewDelegate:class {
     func keyboardViewDidDeleteAtCursor()
     func keyboardViewDidAddText(string: String)
     func keyboardViewWillHide()
+    func keyboardViewCanShiftLowercase() -> (Bool, [String])
 }
 
 enum KeyboardState {
@@ -24,6 +25,7 @@ class KeyboardView: UIView {
     // create all the keys that are needed to form the alphabetå
     var qwertyKeysView = QwertyKeysView()
     var currentAutoCompleteResults: [String]?
+    var isCurrentSingleLetterSymbol: Bool = false
     var keyboardHeight: CGFloat {
         get {
             if UIScreen.main.isiPhoneXFamily {
@@ -77,6 +79,7 @@ class KeyboardView: UIView {
         let selectedKey = getKeyFrom(point: location, keySet: qwertyKeysView.keys)
         highlightKey(highlightedKey: nil, keySet: qwertyKeysView.keys)
         if let keyText = selectedKey?.label.text {
+            if selectedKey?.selectableState == .temporaryUnselectable { return }
             if selectedKey?.keyType == .letter || selectedKey?.keyType == .decimalDigit || selectedKey?.keyType == .punctuation {
                 self.setQwertyKeysState(selectedKey: selectedKey!, keyText: keyText)
             }
@@ -86,6 +89,22 @@ class KeyboardView: UIView {
                 }
                 else if keyText == "Done" {
                     self.delegate?.keyboardViewWillHide()
+                }
+                else if keyText == "⇧" {
+                    if self.currentState == .regularKeyboard {
+                        let lowercase = self.delegate?.keyboardViewCanShiftLowercase()
+                        
+                        if lowercase?.0 ?? false {
+                            self.currentAutoCompleteResults = lowercase?.1
+                            guard let autocompleteOptions = self.currentAutoCompleteResults else { return }
+                            self.qwertyKeysView.setKeysToLowercase()
+                            self.qwertyKeysView.hideNonAutocompleteOptions(autocompleteOptions: autocompleteOptions, shouldHideNumbersAndSymbols: !isCurrentSingleLetterSymbol)
+                            self.keyboardState = .completingSymbolRegularKeyboard
+                        }
+                    }
+                    else {
+                        self.setKeyboardState(state: .regularKeyboard, keyText: "")
+                    }
                 }
             }
         }
@@ -99,41 +118,45 @@ class KeyboardView: UIView {
     
     func setQwertyKeysState(selectedKey: Key, keyText: String) {
         if self.keyboardState == .completingSymbolRegularKeyboard {
-            if currentAutoCompleteResults?.contains(keyText) ?? false {
-                self.setKeyboardState(state: .regularKeyboard, keyText: keyText)
-            }
-            else {
-                self.setKeyboardState(state: .regularKeyboard, keyText: "")
-                if selectedKey.keyType == .decimalDigit || selectedKey.keyType == .punctuation {
+            if selectedKey.keyType == .letter {
+                if currentAutoCompleteResults?.contains(keyText) ?? false {
                     self.setKeyboardState(state: .regularKeyboard, keyText: keyText)
+                    return
                 }
+                self.setKeyboardState(state: .regularKeyboard, keyText: "")
+                return
             }
+            
+            self.setKeyboardState(state: .regularKeyboard, keyText: "")
+            self.setKeyboardState(state: .regularKeyboard, keyText: keyText)
+            return
         }
-        else if self.keyboardState == .regularKeyboard {
-            self.setKeyboardState(state: .completingSymbolRegularKeyboard, keyText: keyText)
-        }
+        
+        self.setKeyboardState(state: .completingSymbolRegularKeyboard, keyText: keyText)
     }
     
     func setKeyboardState(state: KeyboardState, keyText: String) {
+        print("state: \(state)")
         guard let delegate = delegate else { return }
         if state == .completingSymbolRegularKeyboard {
             let results = delegate.keyboardViewDidGiveTemporaryString(letter: keyText)
             currentAutoCompleteResults = results.0
-            let isSingleLetterSymbol = results.1
+            isCurrentSingleLetterSymbol = results.1
             if let autocompleteResults = currentAutoCompleteResults {
                 if autocompleteResults.count > 0 {
-                    qwertyKeysView.hideNonAutocompleteOptions(autocompleteOptions: autocompleteResults, shouldHideNumbersAndSymbols: !isSingleLetterSymbol)
+                    qwertyKeysView.hideNonAutocompleteOptions(autocompleteOptions: autocompleteResults, shouldHideNumbersAndSymbols: !isCurrentSingleLetterSymbol)
                     self.keyboardState = .completingSymbolRegularKeyboard
                     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.05) {
                         if self.keyboardState == .completingSymbolRegularKeyboard {
                             self.qwertyKeysView.setKeysToLowercase()
                         }
                     }
-                }
-                else {
-                    self.keyboardState = .regularKeyboard
+                    return
                 }
             }
+            print("Did add: \(keyText)")
+            self.keyboardState = .regularKeyboard
+            delegate.keyboardViewDidAddText(string: keyText)
             return
         }
         

@@ -51,7 +51,8 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
             else if oldValue != .selectedTextField && state == .selectedTextField {
                 homeView.formulaInputView.y1Anchor = .bottom
                 homeView.formulaInputView.state = .showingTextField
-                homeView.formulaInputView.heightALAnchor = .height((self.view.frame.height / 2).constant)
+                
+                homeView.formulaInputView.heightALAnchor = .height((UIScreen.main.isiPhoneXFamily ? self.view.frame.height * 0.43 : self.view.frame.height * 0.5).constant)
                 homeView.formulaInputView.layer.cornerRadius = 30
                 homeView.formulaInputView.x1Anchor = .left
                 homeView.formulaInputView.x2Anchor = .right
@@ -69,7 +70,11 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
                 }
             }
             else if oldValue != .showingResults && state == .showingResults {
-                self.homeView.formulaInputView.y1Anchor = .bottom(20.scaled.pad)
+                homeView.formulaInputView.y1Anchor = .bottom(UIScreen.main.isiPhoneXFamily ? 50.scaled.pad : 20.scaled.pad)
+                homeView.formulaInputView.heightALAnchor = .height(70.scaled.constant)
+                homeView.formulaInputView.x1Anchor = .left(20.scaled.pad)
+                homeView.formulaInputView.x2Anchor = .right(20.scaled.pad)
+                homeView.formulaInputView.layer.cornerRadius = 10
                 UIView.animate(withDuration: 0.5) {
                     self.view.layoutIfNeeded()
                 }
@@ -128,11 +133,32 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     func keyboardViewDidFinishString(letter: String) {
         // TODO: Fix deleting when only 1 letter in preview string
         // reset preview string
+        if let _ = Int(letter) {
+            self.periodicTable.previewString = ""
+            periodicTable.currentFormulaString += letter
+            updateMolarMassCalculations()
+            return
+        }
+
         periodicTable.previewString += letter
-        print(periodicTable.previewString)
+        
+        
         if !periodicTable.elementSymbols.contains(periodicTable.previewString) {
+            // check if the previous
+            if let previewAscii = periodicTable.previewString.first?.ascii, let formulaAscii = periodicTable.currentFormulaString.last?.ascii {
+                if previewAscii >= 97 && previewAscii <= 122 && formulaAscii >= 65 && formulaAscii <= 90 {
+                    let newSymbol = String(periodicTable.currentFormulaString.last!) + String(periodicTable.previewString.first!)
+                    if periodicTable.elementSymbols.contains(newSymbol) {
+                        periodicTable.currentFormulaString += periodicTable.previewString
+                        periodicTable.previewString = ""
+                        updateMolarMassCalculations()
+                        return
+                    }
+                }
+            }
             periodicTable.previewString = ""
         }
+        
         // append new text
         periodicTable.currentFormulaString += periodicTable.previewString
         periodicTable.previewString = ""
@@ -143,7 +169,9 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     func keyboardViewDidGiveTemporaryString(letter: String) -> ([String], Bool) {
         let combinations = periodicTable.findSymbolCombinations(with: letter)
         if combinations.count == 0 {
-            periodicTable.currentFormulaString += letter
+            if periodicTable.elementSymbols.contains(letter) {
+                periodicTable.currentFormulaString += letter
+            }
             periodicTable.previewString = ""
         }
         else {
@@ -176,6 +204,20 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     func keyboardViewWillHide() {
         self.homeView.formulaInputView.inputTextField.resignFirstResponder()
         self.state = .showingResults
+    }
+    
+    func keyboardViewCanShiftLowercase() -> (Bool, [String]) {
+        if let last = periodicTable.previewString.last {
+            guard let ascii = last.ascii else { return (false, []) }
+            if ascii >= 65 && ascii <= 90 { return (true, periodicTable.findSymbolCombinations(with: String(last))) }
+            return (false, [])
+        }
+        else if let last = periodicTable.currentFormulaString.last {
+            guard let ascii = last.ascii else { return (false, []) }
+            if ascii >= 65 && ascii <= 90 { return (true, periodicTable.findSymbolCombinations(with: String(last))) }
+            return (false, [])
+        }
+        return (false, [])
     }
     
     func updateMolarMassCalculations() {

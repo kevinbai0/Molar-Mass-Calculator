@@ -48,6 +48,24 @@ class QwertyKeysView: UIView {
         }
     }
     let keyTopSpacing: CGFloat = 10.scaled
+    
+    var isUpperCase: Bool = true {
+        didSet {
+            if isUpperCase {
+                UIView.animate(withDuration: 0.05, delay: 0.0, options: .allowUserInteraction, animations: {
+                    self.keys[36].backgroundColor = .rgb(51,51,51)
+                    self.keys[36].label.textColor = .white
+                }, completion: nil)
+                
+            }
+            else {
+                UIView.animate(withDuration: 0.05, delay: 0.0, options: .allowUserInteraction, animations: {
+                    self.keys[36].backgroundColor = .white
+                    self.keys[36].label.textColor = .rgb(51,51,51)
+                }, completion: nil)
+            }
+        }
+    }
 
     
     var keys: [Key] = [
@@ -130,6 +148,10 @@ class QwertyKeysView: UIView {
         // delete all and done button
         keys[41].addToView(self, .left(keys[40].right, keyHorizontalPadding.pad), .centerX, .height(keyHeight.constant), .top(keys[38].top))
         keys[42].addToView(self, .left(keys[41].right, keyHorizontalPadding.pad), .right(keyHorizontalPadding.pad), .top(keys[38].top), .height(keyHeight.constant))
+        
+        // color the shift button
+        keys[36].backgroundColor = .rgb(51,51,51)
+        keys[36].label.textColor = .white
     }
     
     func hideNonAutocompleteOptions(autocompleteOptions: [String], shouldHideNumbersAndSymbols: Bool) {
@@ -146,12 +168,14 @@ class QwertyKeysView: UIView {
     }
     
     func setKeysToLowercase() {
+        self.isUpperCase = false
         for key in keys {
             if key.keyType == .letter { key.label.text = key.label.text?.lowercased() }
         }
         // shift label
     }
     func setKeysToUppercase() {
+        self.isUpperCase = true
         for key in keys {
             if key.keyType == .letter { key.label.text = key.label.text?.uppercased() }
         }
