@@ -51,47 +51,47 @@ class QwertyKeysView: UIView {
 
     
     var keys: [Key] = [
-        Key(letter: "0"),
-        Key(letter: "1"),
-        Key(letter: "2"),
-        Key(letter: "3"),
-        Key(letter: "4"),
-        Key(letter: "5"),
-        Key(letter: "6"),
-        Key(letter: "7"),
-        Key(letter: "8"),
-        Key(letter: "9"),
-        Key(letter: "Q"),
-        Key(letter: "W"),
-        Key(letter: "E"),
-        Key(letter: "R"),
-        Key(letter: "T"),
-        Key(letter: "Y"),
-        Key(letter: "U"),
-        Key(letter: "I"),
-        Key(letter: "O"),
-        Key(letter: "P"),
-        Key(letter: "A"),
-        Key(letter: "S"),
-        Key(letter: "D"),
-        Key(letter: "F"),
-        Key(letter: "G"),
-        Key(letter: "H"),
-        Key(letter: "J"),
-        Key(letter: "K"),
-        Key(letter: "L"),
-        Key(letter: "Z"),
-        Key(letter: "X"),
-        Key(letter: "C"),
-        Key(letter: "V"),
-        Key(letter: "B"),
-        Key(letter: "N"),
-        Key(letter: "M"),
+        Key(letter: "0", type: .decimalDigit),
+        Key(letter: "1", type: .decimalDigit),
+        Key(letter: "2", type: .decimalDigit),
+        Key(letter: "3", type: .decimalDigit),
+        Key(letter: "4", type: .decimalDigit),
+        Key(letter: "5", type: .decimalDigit),
+        Key(letter: "6", type: .decimalDigit),
+        Key(letter: "7", type: .decimalDigit),
+        Key(letter: "8", type: .decimalDigit),
+        Key(letter: "9", type: .decimalDigit),
+        Key(letter: "Q", type: .letter),
+        Key(letter: "W", type: .letter),
+        Key(letter: "E", type: .letter),
+        Key(letter: "R", type: .letter),
+        Key(letter: "T", type: .letter),
+        Key(letter: "Y", type: .letter),
+        Key(letter: "U", type: .letter),
+        Key(letter: "I", type: .letter),
+        Key(letter: "O", type: .letter),
+        Key(letter: "P", type: .letter),
+        Key(letter: "A", type: .letter),
+        Key(letter: "S", type: .letter),
+        Key(letter: "D", type: .letter),
+        Key(letter: "F", type: .letter),
+        Key(letter: "G", type: .letter),
+        Key(letter: "H", type: .letter),
+        Key(letter: "J", type: .letter),
+        Key(letter: "K", type: .letter),
+        Key(letter: "L", type: .letter),
+        Key(letter: "Z", type: .letter),
+        Key(letter: "X", type: .letter),
+        Key(letter: "C", type: .letter),
+        Key(letter: "V", type: .letter),
+        Key(letter: "B", type: .letter),
+        Key(letter: "N", type: .letter),
+        Key(letter: "M", type: .letter),
         Key(letter: "⇧", type: .control),
         Key(letter: "←", type: .control),
-        Key(letter: "•"),
-        Key(letter: "("),
-        Key(letter: ")"),
+        Key(letter: "•", type: .punctuation),
+        Key(letter: "(", type: .punctuation),
+        Key(letter: ")", type: .punctuation),
         Key(letter: "Del All", type: .control),
         Key(letter: "Done", type: .control)
     ]
@@ -119,7 +119,7 @@ class QwertyKeysView: UIView {
         for i in 30..<36 {
             keys[i].addToView(self, .left(keys[i-1].right, keyHorizontalPadding.pad), .width(keyWidth.constant), .height(keyHeight.constant), .top(keys[20].bottom, keyVerticalPadding.pad))
         }
-        //shift and delete
+        // ⇧ button and delete
         keys[36].addToView(self, .left(keyHorizontalPadding.pad), .right(keys[29].left, keyHorizontalPadding.pad), .height(keyHeight.constant), .top(keys[29].top))
         keys[37].addToView(self, .left(keyHorizontalPadding.pad, keys[35].right), .right(keyHorizontalPadding.pad), .height(keyHeight.constant), .top(keys[35].top))
         // •, (, and )
@@ -130,22 +130,16 @@ class QwertyKeysView: UIView {
         // delete all and done button
         keys[41].addToView(self, .left(keys[40].right, keyHorizontalPadding.pad), .centerX, .height(keyHeight.constant), .top(keys[38].top))
         keys[42].addToView(self, .left(keys[41].right, keyHorizontalPadding.pad), .right(keyHorizontalPadding.pad), .top(keys[38].top), .height(keyHeight.constant))
-        // Done button
-        // ⇧ button
-        //keys[29].addToView(self, .left(keyHorizontalPadding.pad), .right(keys[19].left, (keyHorizontalPadding * 2).pad), .top(keys[19].top), .height(keyHeight.constant))
-        
-        // set keys q and j to never selectable since those are never used in the periodic table
-        keys[10].selectableState = .permanentUnselectable
-        keys[26].selectableState = .permanentUnselectable
     }
     
-    func hideNonAutocompleteOptions(autocompleteOptions: [String]) {
+    func hideNonAutocompleteOptions(autocompleteOptions: [String], shouldHideNumbersAndSymbols: Bool) {
         for key in keys {
             if let keyText = key.label.text {
                 if !autocompleteOptions.contains(keyText.lowercased()) && key.keyType == .letter {
-                    if key.selectableState != .permanentUnselectable {
-                        key.selectableState = .temporaryUnselectable
-                    }
+                    key.selectableState = .temporaryUnselectable
+                }
+                if shouldHideNumbersAndSymbols && (key.keyType == .decimalDigit || key.keyType == .symbol) {
+                    key.selectableState = .temporaryUnselectable
                 }
             }
         }
@@ -155,6 +149,7 @@ class QwertyKeysView: UIView {
         for key in keys {
             if key.keyType == .letter { key.label.text = key.label.text?.lowercased() }
         }
+        // shift label
     }
     func setKeysToUppercase() {
         for key in keys {

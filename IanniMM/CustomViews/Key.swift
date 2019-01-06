@@ -37,26 +37,28 @@ class Key: UIView {
     var selectableState: KeyState = .defaultState {
         didSet {
             if oldValue != .defaultState && selectableState == .defaultState {
-                UIView.animate(withDuration: 0.1, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
+                UIView.animate(withDuration: 0.05, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
                     self.backgroundColor = .white
                     self.transform = .identity
                     self.label.alpha = 1.0
                 }, completion: nil)
             }
             else if oldValue != .highlightedState && selectableState == .highlightedState {
-                UIView.animate(withDuration: 0.1, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
-                    self.backgroundColor = .rgb(178,178,178)
+                UIView.animate(withDuration: 0.05, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
+                    self.backgroundColor = .rgb(230,230,230)
+                    self.alpha = 1.0
                     self.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
                 }, completion: nil)
             }
             else if oldValue != .permanentUnselectable && selectableState == .permanentUnselectable {
                 self.label.alpha = 0.0
-                self.backgroundColor = .rgb(51,51,51)
+                self.alpha = 0.3
             }
             else if oldValue != .temporaryUnselectable && selectableState == .temporaryUnselectable {
-                UIView.animate(withDuration: 0.1) {
+                UIView.animate(withDuration: 0.05, delay: 0.0, options: UIViewAnimationOptions.allowUserInteraction, animations: {
                     self.label.alpha = 0.0
-                }
+                    self.alpha = 1.0
+                }, completion: nil)
             }
         }
     }

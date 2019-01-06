@@ -10,7 +10,7 @@ import UIKit
 
 protocol KeyboardViewDelegate:class {
     func keyboardViewDidFinishString(letter: String)
-    func keyboardViewDidGiveTemporaryString(letter: String) -> [String]
+    func keyboardViewDidGiveTemporaryString(letter: String) -> ([String], Bool)
     func keyboardViewDidDeleteAtCursor()
     func keyboardViewDidAddText(string: String)
     func keyboardViewWillHide()
@@ -23,8 +23,7 @@ enum KeyboardState {
 class KeyboardView: UIView {
     // create all the keys that are needed to form the alphabetå
     var qwertyKeysView = QwertyKeysView()
-    var numpadKeysView = NumpadKeysView()
-    
+    var currentAutoCompleteResults: [String]?
     var keyboardHeight: CGFloat {
         get {
             if UIScreen.main.isiPhoneXFamily {
@@ -35,45 +34,12 @@ class KeyboardView: UIView {
     }
     
     var delegate: KeyboardViewDelegate?
-    private var keyboardState: KeyboardState = .regularKeyboard {
-        didSet {
-            if oldValue != .numpad && keyboardState == .numpad {
-                if oldValue == .completingSymbolRegularKeyboard {
-                    delegate?.keyboardViewDidFinishString(letter: "")
-                    self.resetKeyHighlights(keySet: qwertyKeysView.keys)
-                    qwertyKeysView.setKeysToUppercase()
-                }
-                numpadKeysView.isHidden = false
-                UIView.animateKeyframes(withDuration: 0.2, delay: 0.0, options: .calculationModeCubic, animations: {
-                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
-                        self.qwertyKeysView.alpha = 0.0
-                    }
-                    UIView.addKeyframe(withRelativeStartTime: 0.5, relativeDuration: 0.5) {
-                        self.numpadKeysView.alpha = 1.0
-                    }
-                }) { _ in
-                    self.qwertyKeysView.isHidden = true
-                }
-            }
-            else if oldValue == .numpad && keyboardState == .regularKeyboard {
-                qwertyKeysView.isHidden = false
-                UIView.animateKeyframes(withDuration: 0.2, delay: 0.0, options: .calculationModeCubic, animations: {
-                    UIView.addKeyframe(withRelativeStartTime: 0.0, relativeDuration: 0.5) {
-                        self.numpadKeysView.alpha = 0.0
-                    }
-                    UIView.addKeyframe(withRelativeStartTime: 0.5, relativeDuration: 0.5) {
-                        self.qwertyKeysView.alpha = 1.0
-                    }
-                }) { _ in
-                    self.numpadKeysView.isHidden = true
-                }
-            }
-        }
-    }
     
     var currentState: KeyboardState {
         get { return self.keyboardState }
     }
+    
+    var keyboardState: KeyboardState = .regularKeyboard
     
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     init() {
@@ -82,9 +48,6 @@ class KeyboardView: UIView {
         
         self.clipsToBounds = true
         qwertyKeysView.addToView(self, .left, .right, .top, .bottom)
-        numpadKeysView.addToView(self, .left, .right, .top, .bottom)
-        numpadKeysView.isHidden = true
-        numpadKeysView.alpha = 0.0
         self.backgroundColor = .white
         // set frame
         self.frame = CGRect(x: 0, y: UIScreen.main.bounds.height - keyboardHeight, width: UIScreen.main.bounds.width, height: keyboardHeight)
@@ -97,39 +60,29 @@ class KeyboardView: UIView {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let location = touches.first?.location(in: self) else { return }
-        let keySet = keyboardState == .numpad ? numpadKeysView.keys : qwertyKeysView.keys
-        let selectedKey = getKeyFrom(point: location, keySet: keySet)
-        highlightKey(highlightedKey: selectedKey, keySet: keySet)
+        let selectedKey = getKeyFrom(point: location, keySet: qwertyKeysView.keys)
+        highlightKey(highlightedKey: selectedKey, keySet: qwertyKeysView.keys)
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let location = touches.first?.location(in: self) else { return }
-        let keySet = keyboardState == .numpad ? numpadKeysView.keys : qwertyKeysView.keys
-        let selectedKey = getKeyFrom(point: location, keySet: keySet)
-        highlightKey(highlightedKey: selectedKey, keySet: keySet)
+        let selectedKey = getKeyFrom(point: location, keySet: qwertyKeysView.keys)
+        highlightKey(highlightedKey: selectedKey, keySet: qwertyKeysView.keys)
     }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let location = touches.first?.location(in: self) else { return }
-        if keyboardState == .regularKeyboard || keyboardState == .completingSymbolRegularKeyboard {
-            self.handleRegularKeyboardInput(location: location)
-        }
-        else if keyboardState == .numpad {
-            handleNumpadInput(location: location)
-        }
+        self.handleRegularKeyboardInput(location: location)
     }
     
     func handleRegularKeyboardInput(location: CGPoint) {
         let selectedKey = getKeyFrom(point: location, keySet: qwertyKeysView.keys)
         highlightKey(highlightedKey: nil, keySet: qwertyKeysView.keys)
         if let keyText = selectedKey?.label.text {
-            if selectedKey!.keyType == .letter {
+            if selectedKey?.keyType == .letter || selectedKey?.keyType == .decimalDigit || selectedKey?.keyType == .punctuation {
                 self.setQwertyKeysState(selectedKey: selectedKey!, keyText: keyText)
             }
             else {
                 if keyText == "←" {
                     delegate?.keyboardViewDidDeleteAtCursor()
-                }
-                else if keyText == "123" {
-                    self.keyboardState = .numpad
                 }
                 else if keyText == "Done" {
                     self.delegate?.keyboardViewWillHide()
@@ -137,74 +90,58 @@ class KeyboardView: UIView {
             }
         }
         else if self.keyboardState == .completingSymbolRegularKeyboard {
-            self.keyboardState = .regularKeyboard
             delegate?.keyboardViewDidFinishString(letter: "")
             self.resetKeyHighlights(keySet: qwertyKeysView.keys)
             qwertyKeysView.setKeysToUppercase()
+            self.keyboardState = .regularKeyboard
         }
     }
     
     func setQwertyKeysState(selectedKey: Key, keyText: String) {
         if self.keyboardState == .completingSymbolRegularKeyboard {
-            if selectedKey.selectableState == .defaultState {
+            if currentAutoCompleteResults?.contains(keyText) ?? false {
                 self.setKeyboardState(state: .regularKeyboard, keyText: keyText)
             }
             else {
                 self.setKeyboardState(state: .regularKeyboard, keyText: "")
+                if selectedKey.keyType == .decimalDigit || selectedKey.keyType == .punctuation {
+                    self.setKeyboardState(state: .regularKeyboard, keyText: keyText)
+                }
             }
         }
         else if self.keyboardState == .regularKeyboard {
-            if selectedKey.selectableState == .defaultState {
-                self.setKeyboardState(state: .completingSymbolRegularKeyboard, keyText: keyText)
-            }
-            else {
-                self.setKeyboardState(state: .completingSymbolRegularKeyboard, keyText: "")
-            }
-        }
-    }
-    
-    func handleNumpadInput(location: CGPoint) {
-        let selectedKey = getKeyFrom(point: location, keySet: numpadKeysView.keys)
-        highlightKey(highlightedKey: nil, keySet: numpadKeysView.keys)
-        if let keyText = selectedKey?.label.text {
-            if selectedKey!.keyType == .letter {
-                self.delegate?.keyboardViewDidAddText(string: keyText)
-            }
-            else {
-                if keyText == "←" {
-                    delegate?.keyboardViewDidDeleteAtCursor()
-                }
-                else if keyText == "abc" {
-                    self.keyboardState = .regularKeyboard
-                }
-                else if keyText == "Done" {
-                    self.delegate?.keyboardViewWillHide()
-                }
-            }
+            self.setKeyboardState(state: .completingSymbolRegularKeyboard, keyText: keyText)
         }
     }
     
     func setKeyboardState(state: KeyboardState, keyText: String) {
+        guard let delegate = delegate else { return }
         if state == .completingSymbolRegularKeyboard {
-            if let autocompleteResults = delegate?.keyboardViewDidGiveTemporaryString(letter: keyText) {
+            let results = delegate.keyboardViewDidGiveTemporaryString(letter: keyText)
+            currentAutoCompleteResults = results.0
+            let isSingleLetterSymbol = results.1
+            if let autocompleteResults = currentAutoCompleteResults {
                 if autocompleteResults.count > 0 {
-                    qwertyKeysView.hideNonAutocompleteOptions(autocompleteOptions: autocompleteResults)
+                    qwertyKeysView.hideNonAutocompleteOptions(autocompleteOptions: autocompleteResults, shouldHideNumbersAndSymbols: !isSingleLetterSymbol)
                     self.keyboardState = .completingSymbolRegularKeyboard
-                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
-                        self.qwertyKeysView.setKeysToLowercase()
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.05) {
+                        if self.keyboardState == .completingSymbolRegularKeyboard {
+                            self.qwertyKeysView.setKeysToLowercase()
+                        }
                     }
                 }
                 else {
                     self.keyboardState = .regularKeyboard
                 }
             }
+            return
         }
-        else if state == .regularKeyboard {
-            qwertyKeysView.setKeysToUppercase()
-            delegate?.keyboardViewDidFinishString(letter: keyText)
-            self.keyboardState = .regularKeyboard
-            self.resetKeyHighlights(keySet: qwertyKeysView.keys)
-        }
+        
+        qwertyKeysView.setKeysToUppercase()
+        delegate.keyboardViewDidFinishString(letter: keyText)
+        self.keyboardState = .regularKeyboard
+        self.resetKeyHighlights(keySet: qwertyKeysView.keys)
+        
     }
     
     private func highlightKey(highlightedKey: Key?, keySet: [Key]) {
@@ -224,9 +161,7 @@ class KeyboardView: UIView {
     
     private func resetKeyHighlights(keySet: [Key]) {
         for key in keySet {
-            if key.selectableState != .permanentUnselectable {
-                key.selectableState = .defaultState
-            }
+            key.selectableState = .defaultState
         }
     }
     

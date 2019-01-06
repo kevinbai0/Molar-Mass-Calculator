@@ -129,6 +129,7 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
         // TODO: Fix deleting when only 1 letter in preview string
         // reset preview string
         periodicTable.previewString += letter
+        print(periodicTable.previewString)
         if !periodicTable.elementSymbols.contains(periodicTable.previewString) {
             periodicTable.previewString = ""
         }
@@ -139,15 +140,17 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
     }
     
     // return the autocomplete characters
-    func keyboardViewDidGiveTemporaryString(letter: String) -> [String] {
-        periodicTable.previewString = letter
+    func keyboardViewDidGiveTemporaryString(letter: String) -> ([String], Bool) {
         let combinations = periodicTable.findSymbolCombinations(with: letter)
         if combinations.count == 0 {
             periodicTable.currentFormulaString += letter
             periodicTable.previewString = ""
         }
+        else {
+            periodicTable.previewString = letter
+        }
         updateMolarMassCalculations()
-        return combinations
+        return (combinations, periodicTable.elementSymbols.contains(letter))
     }
     func keyboardViewDidDeleteAtCursor() {
         if periodicTable.previewString.count > 0 {
@@ -160,7 +163,6 @@ class HomeViewController: UIViewController, HomeViewDelegate, KeyboardViewDelega
                 formatted.removeLast()
                 periodicTable.currentFormulaString = FormulaStringFormatter.formatToString(formatted: formatted)
             }
-            
         }
         updateMolarMassCalculations()
     }
